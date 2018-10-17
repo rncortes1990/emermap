@@ -5,7 +5,6 @@ const Users = require('./models/user/user')
 const MongoModels = require('mongo-models')
 
 
-
 // Create a server with a host and port
 const server=Hapi.server({
     host:'0.0.0.0',
@@ -14,16 +13,16 @@ const server=Hapi.server({
 const connection = {
     // uri: process.env.MONGODB_URI,
     // db: process.env.MONGODB_NAME
-    uri: 'mongodb://192.168.99.100:27017',
-    db: 'holi'
+    uri: 'mongodb://192.168.99.100:27017/',
+    db: 'test'
 };
-server.options={}
+
 server.route({
     path:'/{name*}',
     method:'GET',
     handler:async function(request,response){
         request.logger.info('In handler %s', request.path);
-        
+
         return `Hello, ${encodeURIComponent(request.params.name)}!`;
     }
 })
@@ -48,12 +47,12 @@ module.exports.server = async function start() {
                 logEvents: ['response']
             }
         },
-        {
-            plugin: Users.Router,
-            routes: {
-                prefix: '/api/v1'
-            }
-        },
+            {
+                plugin: Users.Router,
+                routes: {
+                    prefix: '/api/v1'
+                }
+            },
     ]);
         await server.start();
 
