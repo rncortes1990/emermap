@@ -24,6 +24,7 @@ const adminSchema = Joi.object({
         email:Joi.string().email()
     })
 });
+
 class User extends MongoModels{
     static create(userData){
         return this.insertOne(new User(userData))
@@ -67,11 +68,11 @@ class UsersFactory{
             if(!found)
                 return reject(new Error('Usuario no existente'));
 
-            let streq = Bcrypt.compareSync(userData.password,found.password);
+            let strEq = Bcrypt.compareSync(userData.password,found.password);
         
-            if(!found.isActive && streq)
+            if(!found.isActive && strEq)
                return reject(new Error('El usuario está inactivo'))
-            else if(found && !streq)
+            else if(found && !strEq)
                 return reject(new Error('Contraseña incorrecta'))
             else    
                 return  resolve('Login realizado')
