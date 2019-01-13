@@ -1,8 +1,9 @@
 'use strict';
 
-const Hapi=require('hapi');
 require('dotenv').config();
-
+const Hapi=require('hapi');
+const path = require('path');
+const shell = require('shelljs');
 const Users = require('./models/user/user');// Enrutador de servicios de usuarios
 const MongoModels = require('mongo-models');
 
@@ -17,7 +18,6 @@ const connection = {
     uri: `mongodb://${process.env.MONGODB_URI}/`,
     db: process.env.MONGODB_NAME
 };
-
 server.route({
     path:'/{name*}',
     method:'GET',
@@ -32,12 +32,16 @@ server.route({
 process.on('unhandledRejection', (err) => {
 
     console.log(err,'contact developers team!');
+
     process.exit(1);
 });
 
-
-
-
+var hola ='doaiosjdoaisid'
+shell.exec(`echo ${hola} >>unhandledRejections.log`)
+if (shell.exec('git commit -am "Auto-commit"').code !== 0) {
+    shell.echo('Error: Git commit failed');
+    shell.exit(1);
+  }
 module.exports.server = async function start() {
 
     try {
@@ -59,7 +63,9 @@ module.exports.server = async function start() {
                     prefix: '/api/v1'
                 }
             }
-    ]);
+            ]);
+      
+
         await server.start();
 
     }
