@@ -39,8 +39,7 @@ process.on('unhandledRejection', (err) => {
 var hola ='doaiosjdoaisid'
 shell.exec(`echo ${hola} >>unhandledRejections.log`)
 if (shell.exec('git commit -am "Auto-commit"').code !== 0) {
-    shell.echo('Error: Git commit failed');
-    shell.exit(1);
+
   }
 module.exports.server = async function start() {
 
