@@ -4,8 +4,9 @@ const {Admin,DefaultUser,UsersFactory} = require('./users-model')
 const Joi = require('joi')
 const Boom = require('boom')
 const Bcrypt = require('bcryptjs')
-
-
+const TokenCreation = require('../../utils/token');
+const secret = require('../../utils/token')
+const Validate = require('../../utils/validation');
 const users = {
  
         username: 'john',
@@ -13,25 +14,6 @@ const users = {
         name: 'John Doe',
         id: '2133d32a'
     
-};
-/**
- * Algoritmo de validacion para autenticación
- */
-const validate = async (request, username, password, h) => {
-    console.log(username, password)
-    if (username === 'help') {
-        return { response: h.redirect('https://hapijs.com/help') };     // custom response
-    }
-
-    const user = users[username];
-    if (!user) {
-        return { credentials: null, isValid: false };
-    }
-
-    const isValid = await Bcrypt.compareSync(user.password,password);
-    const credentials = { id: user.id, name: user.name };
-
-    return { isValid, credentials };
 };
 
 exports.Router = {
@@ -71,22 +53,20 @@ exports.Router = {
                 return 'hello, world'+JSON.stringify(request.payload);
             }
         });
-        // server.auth.strategy('simple', 'basic', { validate });
-        // server.auth.default('simple');
+        // server.route({
+        //     method: 'POST',
+        //     path: '/users',
+        //     // options:{
+        //     //     auth:'simple'
+        //     // },
+        //     handler: function (request, h) {
+        //         /** front end para gestion de usuarios */    
+        //         return 'hello, world';
+        //     }
+        // });
         server.route({
             method: 'POST',
             path: '/users',
-            // options:{
-            //     auth:'simple'
-            // },
-            handler: function (request, h) {
-                /** front end para gestion de usuarios */    
-                return 'hello, world';
-            }
-        });
-        server.route({
-            method: 'POST',
-            path: '/users/admin',
             options:{
                 validate:{
                     payload:{
@@ -118,21 +98,30 @@ exports.Router = {
                     let factory = new UsersFactory()
                     let user = Object.assign({},request.payload.user)
                     let resulting = await factory.checkUnity(user)
-                    
+                    var tokenId;
                     if(resulting){
                         return Boom.badRequest(new Error('El usuario ya existe!'))
                     }
-                    if(request.payload.isAdmin)
-                        await Admin.create(user)
-                    else
-                        await DefaultUser.create(user)
-
+                    if(request.payload.isAdmin){
+                        let adminUser = await Admin.create(user)
+                            tokenId = TokenCreation(adminUser[0])
+                    }
+                    else{
+                        let defaultUser = await DefaultUser.create(user)
+                            tokenId = TokenCreation(defaultUser[0])
+                    }
                 }catch(err){
-                    return Boom.badRequest(err)
+                    return Boom.badRequest(err.message)
                 }  
-                return h.response({message:`El Usuario ha sido exitosamente ingresado`});
+                
+                
+                return h.response({
+                    message:`El Usuario ha sido exitosamente ingresado`,
+                    tokenId
+                });
             }
         });
+
         server.route({
             method: 'POST',
             path: '/users/default',

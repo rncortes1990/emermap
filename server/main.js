@@ -6,7 +6,10 @@ const path = require('path');
 const shell = require('shelljs');
 const Users = require('./models/user/user');// Enrutador de servicios de usuarios
 const MongoModels = require('mongo-models');
-
+const UnhandledRejection = require('./utils/logger').UnhandledRejectionLogger;
+const LoggerOptions = require('./utils/logger-options');
+const secret = require('./utils/token')
+const Validate = require('./utils/validation');
 /**
  * se crea server con host y puerto
  */
@@ -28,19 +31,20 @@ server.route({
         return `<h1>Emermap login</h1><br>usuario: <input placeholder="nombre"/><br>clave:<input type="password" placeholder="clave"/>`;
     }
 })
-
+/**
+ * Logger para rejections
+ */
 process.on('unhandledRejection', (err) => {
-
     console.log(err,'contact developers team!');
-
+    var errNDate = err + new Date().toISOString()
+    UnhandledRejection.doLog(hola ,'unhandledRejections');
     process.exit(1);
 });
 
-var hola ='doaiosjdoaisid'
-shell.exec(`echo ${hola} >>unhandledRejections.log`)
-if (shell.exec('git commit -am "Auto-commit"').code !== 0) {
 
-  }
+/** 
+ * Seteo de plugins y middlewares para la app web
+*/
 module.exports.server = async function start() {
 
     try {
@@ -50,20 +54,25 @@ module.exports.server = async function start() {
                 plugin:require('hapi-auth-basic')
             },
             {
-                plugin: require('hapi-pino'),
-                options: {
-                    prettyPrint: true,
-                    logEvents: ['response']
-                    }
+                plugin: require('good'),
+                options:LoggerOptions
             },
             {
                 plugin: Users.Router,
                 routes: {
                     prefix: '/api/v1'
                 }
+            },
+            {
+                plugin:require('hapi-auth-jwt2'),
             }
             ]);
-      
+            // server.auth.strategy('jwt','jwt', {
+            //     key: secret,
+            //     validate:Validate,
+            //     verifyOptions: { algorithms: ['HS256'] }
+            //   }); 
+            //   server.auth.default('jwt');
 
         await server.start();
 
