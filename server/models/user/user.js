@@ -6,7 +6,7 @@ const Boom = require('boom')
 const Bcrypt = require('bcryptjs')
 const TokenCreation = require('../../utils/token');
 const secret = require('../../utils/token')
-const Validate = require('../../utils/validation');
+// const Validate = require('../../utils/validation');
 const users = {
  
         username: 'john',
@@ -20,12 +20,12 @@ exports.Router = {
     name: 'Users',
     version: '1.0.0',
     register: async function (server, options) {
-
         // Create a route for example
         server.route({
             method: 'POST',
             path: '/login',
             options:{
+               auth:'simple',
                 validate:{
                     payload:{
                         email:Joi.string().email(),
@@ -132,3 +132,7 @@ exports.Router = {
         });
     }
 };
+
+exports.Router.attributes={
+    name:'users-routes'
+}

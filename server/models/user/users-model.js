@@ -46,6 +46,7 @@ class DefaultUser extends MongoModels{
     static async create(user){
         this._type = 'default';
         this._user = await User.create(user)
+        user['password'] = Bcrypt.hashSync(user.password, 8);
         let defaultUser = Object.assign({},{user:this._user[0]},{type:'default'})
         return this.insertOne(defaultUser)
     }

@@ -10,6 +10,7 @@ const UnhandledRejection = require('./utils/logger').UnhandledRejectionLogger;
 const LoggerOptions = require('./utils/logger-options');
 const secret = require('./utils/token')
 const Validate = require('./utils/validation');
+
 /**
  * se crea server con host y puerto
  */
@@ -21,16 +22,7 @@ const connection = {
     uri: `mongodb://${process.env.MONGODB_URI}/`,
     db: process.env.MONGODB_NAME
 };
-server.route({
-    path:'/{name*}',
-    method:'GET',
-    handler:async function(request,response){
-        request.logger.info('In handler %s', request.path);
 
-        // return `Hello, ${encodeURIComponent(request.params.name)}!`;
-        return `<h1>Emermap login</h1><br>usuario: <input placeholder="nombre"/><br>clave:<input type="password" placeholder="clave"/>`;
-    }
-})
 /**
  * Logger para rejections
  */
@@ -58,6 +50,9 @@ module.exports.server = async function start() {
                 options:LoggerOptions
             },
             {
+                    plugin:Validate
+            },
+            {
                 plugin: Users.Router,
                 routes: {
                     prefix: '/api/v1'
@@ -67,15 +62,22 @@ module.exports.server = async function start() {
                 plugin:require('hapi-auth-jwt2'),
             }
             ]);
-            // server.auth.strategy('jwt','jwt', {
-            //     key: secret,
-            //     validate:Validate,
-            //     verifyOptions: { algorithms: ['HS256'] }
-            //   }); 
-            //   server.auth.default('jwt');
 
+            server.route({
+                path:'/{name*}',
+                method:'GET',
+                options:{
+                    auth:'simple'
+                },
+                handler:async function(request,response){
+
+            
+                    // return `Hello, ${encodeURIComponent(request.params.name)}!`;
+                    return `<h1>Emermap login</h1><br>usuario: <input placeholder="nombre"/><br>clave:<input type="password" placeholder="clave"/>`;
+                }
+            })
         await server.start();
-
+        
     }
     catch (err) {
         console.log(err);
