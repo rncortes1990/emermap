@@ -66,6 +66,7 @@ class UsersFactory{
     async login(userData){
         return new Promise(async(resolve,reject)=>{ 
             let found = await User.findOne({email:userData.email})
+           
             if(!found)
                 return reject(new Error('Usuario no existente'));
 
@@ -75,8 +76,10 @@ class UsersFactory{
                return reject(new Error('El usuario está inactivo'))
             else if(found && !strEq)
                 return reject(new Error('Contraseña incorrecta'))
-            else    
-                return  resolve('Login realizado')
+            else 
+                var auxUser = Object.assign({},found)  
+                delete auxUser.password
+                return  resolve({message:'Login realizado',user:auxUser})
 
         })
     }
